@@ -1,1 +1,33 @@
 
+name: 更新IPTV列表
+
+on:
+  schedule:
+    # 每周二凌晨3点运行（UTC时间）
+    - cron: '0 3 * * 2'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: 设置脚本权限
+      run: chmod +x scripts/iptv_updater.sh
+    
+    - name: 运行更新脚本
+      run: cd scripts && ./iptv_updater.sh
+    
+    - name: 提交更新
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add output/iptv.m3u8
+        git add last_update.log
+        git commit -m "自动更新: $(date '+%Y-%m-%d %H:%M:%S')" || echo "无更新内容"
+        git push origin main
