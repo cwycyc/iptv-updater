@@ -1,40 +1,34 @@
 #!/bin/bash
 # IPTV自动更新脚本 - GitHub Actions完整处理版
-# 在云端完成所有处理，OpenWRT只需下载成品
 
 set -e
 
-# 配置参数（GitHub Secrets或直接设置）
-# 注意：这里是您的本地udpxy地址，GitHub Actions会将其硬编码到文件中
+# 输出目录（在仓库根目录）
+OUTPUT_DIR="../docs"
+
+# 确保输出目录存在
+mkdir -p "$OUTPUT_DIR"
+
+# 配置参数
 UDPXY_HOST=${INPUT_UDPXY_HOST:-"192.168.10.2"}
 UDPXY_PORT=${INPUT_UDPXY_PORT:-"4022"}
 UDPXY_ADDR="http://${UDPXY_HOST}:${UDPXY_PORT}"
 
-# 源URL列表
-SOURCE_URLS=(
-    "https://raw.githubusercontent.com/0987363/iptv-chengdu/master/home/iptv.m3u8"
-    "https://cdn.jsdelivr.net/gh/0987363/iptv-chengdu@master/home/iptv.m3u8"
-    "https://ghproxy.com/https://raw.githubusercontent.com/0987363/iptv-chengdu/master/home/iptv.m3u8"
-)
-
-# 文件路径
-OUTPUT_DIR="docs"
-PROCESSED_FILE="iptv_processed.m3u8"  # 处理后的文件
-RAW_FILE="iptv_raw.m3u8"              # 原始文件备份
+# 文件路径（相对于输出目录）
+PROCESSED_FILE="iptv_processed.m3u8"
+RAW_FILE="iptv_raw.m3u8"
 TEMP_FILE="/tmp/iptv_temp.m3u8"
 LOG_FILE="update.log"
 
-# 创建目录
-mkdir -p "$OUTPUT_DIR"
-
-# 日志函数
+# 日志函数 - 同时输出到控制台和文件
 log() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local message="[$timestamp] $1"
-    echo "$message"  # 输出到控制台
-    echo "$message" >> "$LOG_FILE"  # 保存到日志文件
+    echo "$message"
+    echo "$message" >> "$OUTPUT_DIR/$LOG_FILE"
 }
 
+# ... 脚本其余部分保持不变 ...
 # 下载函数
 download_from_urls() {
     log "开始下载IPTV列表"
