@@ -5,11 +5,6 @@ on:
     # 每周二北京时间上午8点（UTC时间0点）
     - cron: '0 0 * * 2'
   workflow_dispatch:  # 允许手动触发
-  push:
-    branches: [ main ]
-    paths:
-      - 'scripts/**'
-      - '.github/workflows/**'
 
 jobs:
   update-iptv:
@@ -32,6 +27,12 @@ jobs:
         INPUT_UDPXY_HOST: "192.168.10.2"
         INPUT_UDPXY_PORT: "4022"
         
+    - name: 检查docs目录
+      run: |
+        echo "检查docs目录内容:"
+        ls -la docs/ || echo "docs目录不存在，正在创建..."
+        mkdir -p docs
+        
     - name: 查看更新日志
       run: cat docs/update.log || echo "无日志文件"
         
@@ -42,19 +43,24 @@ jobs:
         
     - name: 提交更新文件
       run: |
-        git add docs/
-        git status
-        # 检查是否有文件需要提交
-        if ! git diff --cached --quiet; then
+        # 确保docs目录存在
+        mkdir -p docs
+        
+        # 添加docs目录下的所有文件
+        if [ -d "docs" ] && [ -n "$(ls -A docs/ 2>/dev/null)" ]; then
+          git add docs/
+          git status
           git commit -m "📺 IPTV自动更新: $(date '+%Y-%m-%d %H:%M:%S')"
           git push origin main
           echo "✅ 文件已提交"
         else
-          echo "⚠️  没有文件需要更新"
+          echo "❌ docs目录为空或不存在，跳过提交"
+          exit 1
         fi
         
     - name: 部署到GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
+      if: success()  # 只有上一步成功才执行
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs
