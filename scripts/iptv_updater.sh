@@ -14,6 +14,13 @@ UDPXY_HOST=${INPUT_UDPXY_HOST:-"192.168.10.2"}
 UDPXY_PORT=${INPUT_UDPXY_PORT:-"4022"}
 UDPXY_ADDR="http://${UDPXY_HOST}:${UDPXY_PORT}"
 
+# 源URL列表
+SOURCE_URLS=(
+    "https://raw.githubusercontent.com/0987363/iptv-chengdu/master/home/iptv.m3u8"
+    "https://cdn.jsdelivr.net/gh/0987363/iptv-chengdu@master/home/iptv.m3u8"
+    "https://ghproxy.com/https://raw.githubusercontent.com/0987363/iptv-chengdu/master/home/iptv.m3u8"
+)
+
 # 文件路径（相对于输出目录）
 PROCESSED_FILE="iptv_processed.m3u8"
 RAW_FILE="iptv_raw.m3u8"
