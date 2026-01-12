@@ -2,93 +2,37 @@ name: IPTV自动更新
 
 on:
   schedule:
-    - cron: '0 0 * * 2'  # 每周二UTC 0点
+    - cron: '0 0 * * 2'
   workflow_dispatch:
 
 jobs:
   update-iptv:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write
+      pages: write
+    
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v3
-      with:
-        persist-credentials: true
-        
-    - name: 设置脚本权限
-      run: chmod +x scripts/iptv_updater.sh
-      
-    - name: 运行IPTV更新脚本
+    - uses: actions/checkout@v3
+    
+    - name: 运行更新脚本
       run: |
-        # 进入脚本目录并运行
+        chmod +x scripts/iptv_updater.sh
         cd scripts
         ./iptv_updater.sh
-      env:
-        INPUT_UDPXY_HOST: "192.168.10.2"
-        INPUT_UDPXY_PORT: "4022"
         
-    - name: 验证文件生成
+    - name: 提交并推送
       run: |
-        echo "检查当前目录结构:"
-        pwd
-        ls -la
-        echo "检查docs目录:"
-        ls -la docs/ || echo "docs目录不存在"
-        echo "检查scripts目录:"
-        ls -la scripts/
-        
-    - name: 移动文件到正确位置
-      run: |
-        # 检查脚本是否在scripts目录下生成了docs
-        if [ -d "scripts/docs" ]; then
-          echo "在scripts目录下找到docs，移动到根目录"
-          cp -r scripts/docs/* docs/ 2>/dev/null || true
-        fi
-        
-        # 检查脚本是否在scripts目录生成了文件
-        if ls scripts/*.m3u8 scripts/*.log scripts/*.json scripts/*.html 1> /dev/null 2>&1; then
-          echo "在scripts目录找到输出文件，移动到docs"
-          mkdir -p docs
-          mv scripts/*.m3u8 scripts/*.log scripts/*.json scripts/*.html docs/ 2>/dev/null || true
-        fi
-        
-    - name: 创建docs目录（如果不存在）
-      run: |
-        mkdir -p docs
-        # 创建测试文件以确保目录不为空
-        if [ ! -f "docs/test.txt" ]; then
-          echo "测试文件 - 如果看到这个，说明脚本没有正常生成文件" > docs/test.txt
-        fi
-        
-    - name: 配置Git用户
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        
-    - name: 提交更新文件
-      run: |
-        # 确保docs目录有内容
-        if [ -d "docs" ] && [ "$(ls -A docs 2>/dev/null | wc -l)" -gt 0 ]; then
-          git add docs/
-          git status
-          git commit -m "📺 IPTV自动更新: $(date '+%Y-%m-%d %H:%M:%S')" || echo "无更改"
-          git push origin main
-          echo "✅ 文件已提交"
-        else
-          echo "❌ docs目录为空或不存在"
-          # 列出根目录所有文件
-          echo "根目录内容:"
-          ls -la
-          echo "当前工作目录: $(pwd)"
-          exit 1
-        fi
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add docs/
+        git commit -m "📺 自动更新: $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
+        git push
         
     - name: 部署到GitHub Pages
-      if: success()
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs
         publish_branch: gh-pages
-        force_orphan: true
-        keep_files: false
