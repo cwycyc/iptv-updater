@@ -1,28 +1,22 @@
-
 # IPTV自动更新器
 
-每周二自动更新的IPTV播放列表，已适配udpxy代理。
+每周二自动更新的IPTV播放列表，适配本地udpxy代理，可通过GitHub Pages访问。
+
+## 功能特性
+
+- ✅ 每周二自动更新IPTV列表
+- ✅ 自动替换地址为本地udpxy代理
+- ✅ 调整EPG源顺序优化体验
+- ✅ 生成美观的网页界面
+- ✅ 支持GitHub Pages部署
 
 ## 使用方法
 
-1. 在OpenWRT/LEDE路由器上安装脚本
-2. 修改脚本中的`UDPXY_HOST`和`UDPXY_PORT`为你的udpxy地址
-3. 设置定时任务每周二执行
-
-## 自动更新
-
-本项目使用GitHub Actions每周二自动更新IPTV列表：
-- 原始源：成都电信IPTV
-- 更新频率：每周二
-- 自动替换udpxy地址
-- 自动优化EPG源顺序
-
-## 文件说明
-
-- `scripts/iptv_updater.sh` - 更新脚本
-- `output/iptv.m3u8` - 处理后的播放列表
-- `last_update.log` - 更新日志
-
-## 手动更新
-
-可以在GitHub仓库的Actions标签页手动触发更新。
+1. **配置参数**：编辑`config.json`文件：
+   ```json
+   {
+       "udpxy_host": "你的路由器IP",
+       "udpxy_port": "你的udpxy端口",
+       "output_dir": "docs",
+       "source_urls": ["源URL1", "源URL2"]
+   }
