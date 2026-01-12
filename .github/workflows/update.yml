@@ -1,33 +1,63 @@
-
-name: 更新IPTV列表
+name: IPTV自动更新
 
 on:
   schedule:
-    # 每周二凌晨3点运行（UTC时间）
-    - cron: '0 3 * * 2'
+    # 每周二北京时间上午8点（UTC时间0点）
+    - cron: '0 0 * * 2'
   workflow_dispatch:  # 允许手动触发
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/**'
 
 jobs:
-  update:
+  update-iptv:
     runs-on: ubuntu-latest
     
     steps:
     - name: 检出代码
       uses: actions/checkout@v3
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-    
+        persist-credentials: false
+        
     - name: 设置脚本权限
       run: chmod +x scripts/iptv_updater.sh
-    
-    - name: 运行更新脚本
-      run: cd scripts && ./iptv_updater.sh
-    
-    - name: 提交更新
+      
+    - name: 运行IPTV更新脚本
+      run: |
+        cd scripts
+        ./iptv_updater.sh
+      env:
+        INPUT_UDPXY_HOST: "192.168.10.2"
+        INPUT_UDPXY_PORT: "4022"
+        
+    - name: 查看更新日志
+      run: cat docs/update.log || echo "无日志文件"
+        
+    - name: 配置Git用户
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add output/iptv.m3u8
-        git add last_update.log
-        git commit -m "自动更新: $(date '+%Y-%m-%d %H:%M:%S')" || echo "无更新内容"
-        git push origin main
+        
+    - name: 提交更新文件
+      run: |
+        git add docs/
+        git status
+        # 检查是否有文件需要提交
+        if ! git diff --cached --quiet; then
+          git commit -m "📺 IPTV自动更新: $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin main
+          echo "✅ 文件已提交"
+        else
+          echo "⚠️  没有文件需要更新"
+        fi
+        
+    - name: 部署到GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        publish_branch: gh-pages
+        force_orphan: true
+        keep_files: false
