@@ -1,7 +1,0 @@
-{
-    "channels": 189,
-    "file_size": 65483,
-    "update_time": "2026-01-12 16:15:21",
-    "udpxy_address": "http://192.168.10.2:4022",
-    "epg_sources": ["https://epg.112114.xyz/pp.xml", "https://epg.51zmt.top:8001/e.xml"]
-}
