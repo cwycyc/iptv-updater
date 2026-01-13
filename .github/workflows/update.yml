@@ -19,8 +19,8 @@ jobs:
       
     - name: 运行更新脚本
       run: |
-        chmod +x scripts/iptv_simple_updater.sh
-        scripts/iptv_simple_updater.sh
+        chmod +x scripts/iptv_updater.sh
+        scripts/iptv_updater.sh
       
     - name: 提交更新
       run: |
