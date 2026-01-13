@@ -42,7 +42,12 @@ for url in "${SOURCES[@]}"; do
             sed -i "s|http://[0-9.]\+:[0-9]\+/rtp/|${UDPXY_ADDR}/udp/|g" "$TEMP_FILE"
             sed -i "s|http://[0-9.]\+:[0-9]\+/udp/|${UDPXY_ADDR}/udp/|g" "$TEMP_FILE"
             sed -i "s|catchup-source=\"http://[0-9.]\+:[0-9]\+|catchup-source=\"${UDPXY_ADDR}|g" "$TEMP_FILE"
-            sed -i "1s|url-tvg=\"https://epg\.51zmt\.top:8001/e\.xml,https://epg\.112114\.xyz/pp\.xml\"|url-tvg=\"https://epg.112114.xyz/pp.xml,https://epg.51zmt.top:8001/e.xml\"|" "$TEMP_FILE"
+           
+            # 自定义EPG源 - 无论原文件有没有都设置
+            # 先删除可能存在的url-tvg属性
+            sed -i "s| url-tvg=\"[^\"]*\"||" "$TEMP_FILE"
+            # 在#EXTM3U行末尾添加自定义EPG源
+            sed -i "s|\(#EXTM3U.*\)|\1 url-tvg=\"https://epg.112114.xyz/pp.xml,http://epg.51zmt.top:8000/e.xml.gz\"|" "$TEMP_FILE"
             
             # 检查是否有实际替换
             if grep -q "$UDPXY_ADDR" "$TEMP_FILE"; then
