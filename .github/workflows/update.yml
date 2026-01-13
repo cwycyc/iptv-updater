@@ -2,11 +2,11 @@ name: IPTV自动更新
 
 on:
   schedule:
-    - cron: '0 0 * * 2'
-  workflow_dispatch:
+    - cron: '0 0 * * 2'  # 每周二UTC 0点（北京时间8点）
+  workflow_dispatch:      # 允许手动触发
 
 jobs:
-  update-iptv:
+  update:
     runs-on: ubuntu-latest
     
     permissions:
@@ -14,25 +14,39 @@ jobs:
       pages: write
     
     steps:
-    - uses: actions/checkout@v3
-    
+    - name: 检出代码
+      uses: actions/checkout@v3
+      
     - name: 运行更新脚本
       run: |
-        chmod +x scripts/iptv_updater.sh
-        cd scripts
-        ./iptv_updater.sh
-        
-    - name: 提交并推送
+        chmod +x scripts/iptv_simple_updater.sh
+        scripts/iptv_simple_updater.sh
+      
+    - name: 提交更新
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add docs/
-        git commit -m "📺 自动更新: $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
-        git push
-        
+        # 只有当文件有变化时才提交
+        if [ -f "docs/iptv.m3u8" ]; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          
+          # 检查是否有实际变化
+          if git diff --cached --quiet; then
+            echo "文件无变化，跳过提交"
+          else
+            git commit -m "📺 IPTV更新: $(date '+%Y-%m-%d %H:%M:%S')"
+            git push
+            echo "✅ 更新已提交"
+          fi
+        else
+          echo "❌ 输出文件不存在，跳过提交"
+        fi
+      
     - name: 部署到GitHub Pages
+      if: success()
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs
         publish_branch: gh-pages
+        force_orphan: true
