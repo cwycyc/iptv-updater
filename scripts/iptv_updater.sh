@@ -47,7 +47,7 @@ for url in "${SOURCES[@]}"; do
             # 先删除可能存在的url-tvg属性
             sed -i "s| url-tvg=\"[^\"]*\"||" "$TEMP_FILE"
             # 在#EXTM3U行末尾添加自定义EPG源
-            sed -i "s|\(#EXTM3U.*\)|\1 url-tvg=\"https://epg.112114.xyz/pp.xml,http://epg.51zmt.top:8000/e.xml\"|" "$TEMP_FILE"
+            sed -i "s|\(#EXTM3U.*\)|\1 url-tvg=\"http://epg.51zmt.top:8000/e.xml\"|" "$TEMP_FILE"
             
             # 检查是否有实际替换
             if grep -q "$UDPXY_ADDR" "$TEMP_FILE"; then
