@@ -37,8 +37,8 @@ echo "开始下载EPG数据..."
 
 # EPG源列表（按优先级）
 EPG_SOURCES=(
-    "http://epg.51zmt.top:8000/e.xml"
     "https://epg.112114.xyz/pp.xml"
+    "http://epg.51zmt.top:8000/e.xml"
 )
 
 EPG_DOWNLOADED=false
