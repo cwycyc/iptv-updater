@@ -2,7 +2,7 @@ name: IPTV自动更新
 
 on:
   schedule:
-    - cron: '0 0 * * 2'  # 每周二UTC 0点（北京时间8点）
+    - cron: '0 22 * * *'  #（北京时间6点）
   workflow_dispatch:      # 允许手动触发
 
 jobs:
